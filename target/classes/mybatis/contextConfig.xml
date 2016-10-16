@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+<beans:bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+<!--드라이버 설정.  -->
+	<beans:property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
+	<beans:property name="url" value="jdbc:oracle:thin:@localhost:1521:xe"></beans:property>
+	<beans:property name="username" value="hr"/>
+	<beans:property name="password" value="hr"/>
+	<beans:property name="maxActive" value="500"/>
+	<beans:property name="maxIdle" value="100"/>
+	<beans:property name="poolPreparedStatements" value="true"/>
+	<beans:property name="defaultAutoCommit" value="true"/>
+</beans:bean>
+
+
+<beans:bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+	<beans:property name="dataSource" ref="dataSource"/>
+	<beans:property name="typeAliasesPackage" value="com.model"/><!--자동으로 빈에 담아서 리턴하는데 그 빈이 담겨있는곳이 바로 타입알리아스 패키지  -->
+	<beans:property name="configLocation" value="classpath:mybatis/mybatis_config.xml"/><!--설정해주는곳 :   -->
+	<beans:property name="mapperLocations"><!--배열로 들어가야 된다. -->
+		<beans:array>
+			<beans:value>classpath:mybatis/mapper.xml</beans:value>
+		</beans:array>
+	</beans:property>
+	<!--오라클이 있어. 오라클에 접속하도록 해주는게 데이터 소스지. 그럼 sql세션 팩토리 빈이라는놈이 잡아와.
+		오라클이 -> pool로 -> 팩토리 빈으로 -> sql세션 템플레이트로 연동해주어야 한다.-> 템플레이트가 쿼리문을 돌린다.-->
+
+</beans:bean>
+
+<beans:bean name="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate"><!--템플레이트 -->
+	<beans:constructor-arg name="sqlSessionFactory" ref="sqlSessionFactoryBean"/>
+</beans:bean>
+
+	<context:component-scan base-package="com.*" />
+	
+	
+	
+</beans:beans>

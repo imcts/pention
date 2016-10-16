@@ -1,0 +1,670 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "//mybatis.org/DTD Mapper 3.0//EN" 
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mm">
+	<sql id="getArea">
+		(select menukey from menu where topkey = #{areaSerchKey })
+	</sql>
+
+	<sql id="getThemaArea">
+		(select menukey from menu where topkey = #{thameAreaKey })
+	</sql>
+
+
+	<sql id="selectMax">
+		(select max(IDS)+1 from NOTICEBOARD where SERVICEKEY=#{serviceKey})
+	</sql>
+
+	<sql id="freeselectMax">
+		(select max(FIDS)+1 from FREEBOARD)
+	</sql>
+	
+		
+	<sql id="detailGetMax">
+		(select max(no)+1 from detailboard where pid = #{pid })
+	</sql>
+
+	<sql id="getRoomMaxIndex">
+		(select max(roomindex)+1 from room)
+	</sql>
+	
+
+		<!-- ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ sql 쿼리문 ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ -->
+		
+	<select id="mainPageQna" resultType="databean">
+		select * from noticeboard where servicekey = 'qna' and seq=0 order by ids desc
+	</select>	
+	
+	<select id="mainPageNotice" resultType="databean">
+		select * from noticeboard where servicekey='noticeboard' and seq=0 order by ids desc	
+	</select>	
+	
+	<select id="getGoldGrade" resultType="databean">
+		select * from pention where pgrade=2 and chuchunrank > 6 and chuchunrank <![CDATA[<]]> 16 order by chuchunrank
+	</select> 
+	 	
+	<select id="mainPageOne" parameterType="databean" resultType="databean">
+		select * from pention where chuchunrank=#{rankindex} and pgrade=2
+	</select>	
+	
+	<select id="mainPageList" parameterType="databean" resultType="databean">
+		select * from pention where chuchunrank >=1 and chuchunrank <![CDATA[<=]]> 6 and pgrade=2 order by chuchunrank
+	</select>	
+	
+	<select id="AllPentionListGet" resultType="databean">
+		select * from pention where pgrade=2
+	</select>	
+	
+	<select id="choicePentionListGet" parameterType="databean" resultType="databean">
+		select * from pention where pgrade=2 and address1  like '%' || #{topSerch} || '%' or  pentionname like '%' || #{topSerch} || '%' and pgrade=2
+	</select>	
+		
+	<select id="suggestpension" parameterType="databean" resultType="databean">
+		select * from pention where pgrade=2 and pentionname like '%' || #{topSerch} || '%'
+	</select>
+	
+	<select id="suggestArea" parameterType="databean" resultType="databean">
+		select * from topserch where address1 like '%' || #{topSerch} || '%'
+	</select>
+		
+	<select id="getChuchunListGold" resultType="databean">
+		select * from pention where chuchunrank != 0 and pgrade=2 order by chuchunrank
+	</select>	
+		
+	<update id="updatePentionReset">
+		update pention set CHUCHUNRANK=0
+	</update>	
+		
+	<update id="updatePentionRanking" parameterType="databean">
+		update pention set CHUCHUNRANK=#{chuchunRank} where pid = #{pid}
+	</update>	
+	
+	<update id="updatePentionPoint">
+		update pention set CHUCHUNPOINT=0
+	</update>	
+	
+	<insert id="insertKyunMae" parameterType="databean"> 
+		insert into pay(PAYDAY,MYMONEY,SAUPID,IBGMMONEY) values(sysdate,#{mymoney},#{saupid},0)
+	</insert>	
+		
+	<select id="chuchunPentionGetList" resultType="databean"> 
+		select * from pention where chuchunpoint !=0 and pgrade=2 order by chuchunpoint desc	
+	</select>	
+	
+	<update id="updateMyPoint" parameterType="databean">
+		update pention set CHUCHUNPOINT = #{serchMsg} where pid = #{pid}
+	</update>
+	<select id="getyeyakListMyPention" parameterType="databean" resultType="databean">
+		select * from returnpay where pid = #{pid}
+	</select>	
+		
+	<update id="hwanbulOk" parameterType="databean">
+		update returnpay set hwanbulmsg = '환불완료' where roomindex=#{roomindex}
+	</update>
+	
+	<update id="miligeUpdate" parameterType="databean">
+		update member set point = point-#{milige} where id = #{pid }
+	</update>
+		
+	<update id="deleteYeyak" parameterType="databean">
+		update yeyak set pid='', roomname='' where roomindex=#{roomindex}
+	</update>	
+	
+	<select id="hwanBulOneGet" parameterType="databean" resultType="databean">
+		select * from returnpay where roomindex=#{roomindex}
+	</select>	
+		
+	<select id="hwanbulListGet" resultType="databean" parameterType="databean"> 
+		select * from returnpay where yeyakid=#{yeyakid} order by roomindex desc
+	</select>	
+		
+	<insert id="returningInsert" parameterType="databean">
+		insert into RETURNPAY(STARTDAY,PID,YEYAKID,YEYAKTERM,YEYAKROOMNAME,YEYAKPENTIONNAME,YEYAKINWON,ROOMINDEX,YEYAKMONEY,HWANBULMSG,USERID) 
+		values(#{startday},#{pid},#{yeyakid},#{yeyakTerm},#{yeyakroomname},#{yeyakpentionName},#{yeyakInwon},#{roomindex},#{yeyakMoney},'예약완료',#{yeyakid})
+	</insert>	
+		
+	<select id="roomnameChecking" parameterType="databean" resultType="databean">
+		select * from room where pid=#{pid} and roomname=#{roomname}
+	</select>	
+		
+	<delete id="deleteMyRoom" parameterType="databean">
+		delete from room where pid = #{pid } and roomindex=#{roomindex}
+	</delete>	
+		
+	<select id="getRoomIndexMax" resultType="databean">
+		select * from room where roomindex=1
+	</select>
+	
+	<update id="pentionRoomUpdate" parameterType="databean">
+		update room set roomname=#{roomname}, max=#{max}, min=#{min}, roomsize=#{roomsize}, money=#{money}, addmoney=#{addmoney}, roomphoto=#{areaPhotoGet} 
+		where roomindex=#{roomindex}
+	</update>
+	
+	<select id="getPentionRoomOne" parameterType="databean" resultType="databean">
+		select * from room where pid=#{pid} and roomindex=#{roomindex}
+	</select>
+	
+	<insert id="makeRoomInputNull" parameterType="databean">
+		insert into room(PID,ROOMNAME,MAX,MIN,ROOMSIZE,MONEY,ADDMONEY,ROOMPHOTO,ROOMINDEX,PENTIONNAME) 
+		values(#{pid}, #{roomname}, #{max}, #{min}, #{roomsize}, #{money}, #{addmoney}, #{areaPhotoGet},1,#{pentionName})
+	</insert>	
+	
+	<insert id="makeRoomInput" parameterType="databean">
+		insert into room(PID,ROOMNAME,MAX,MIN,ROOMSIZE,MONEY,ADDMONEY,ROOMPHOTO,ROOMINDEX,PENTIONNAME) 
+		values(#{pid}, #{roomname}, #{max}, #{min}, #{roomsize}, #{money}, #{addmoney}, #{areaPhotoGet},<include refid="getRoomMaxIndex"/>,#{pentionName})
+	</insert>	
+		
+	<select id="getPentionRoomList" parameterType="databean" resultType="databean">
+		select * from room where pid=#{pid }
+	</select>	
+		
+	<update id="pentionUpdateNow" parameterType="databean">
+		update pention set pentionname=#{pentionName }, address1=#{address1 }, address2=#{address2 }, thema=#{thema }, themaoption=#{themaOptionGet },
+		pcontent=#{content}, mainphoto= #{mainphoto}, areaphoto=#{areaPhotoGet} where pid = #{pid }	
+	</update>	
+		
+	<select id="getPentionOne" parameterType="databean" resultType="databean">
+		select * from pention where pid = #{pid}
+	</select>	
+		
+	<insert id="pentionInsertNow" parameterType="databean">
+		insert into pention(PID,PENTIONNAME,ADDRESS1,ADDRESS2,PTELL,THEMA,THEMAOPTION,PCONTENT,MAINPHOTO,AREAPHOTO) 
+		values(#{pid },#{pentionName },#{address1 },#{address2 },#{tell}, #{thema },#{themaOptionGet },#{content},#{mainphoto},#{areaPhotoGet})
+	</insert>	
+		
+	<select id="getPentionList" parameterType="databean" resultType="databean">
+		select * from pention where pid=#{pid }
+	</select>	
+	
+	<update id="saupjaGamangGo" parameterType="databean">
+		update member set saupjaindex=2 where id = #{saupjaGamangId}
+	</update>	
+		
+	<insert id="detailBoardInsertNull"  parameterType="databean" >
+		insert into detailBoard(NO,GNO,DSEQ,DREF,DTODAY,DCOUNT,DUSER,DTITLE,DCONTENT,PID)  
+		values(1,1,0,0,sysdate,-1,#{duser},#{dtitle},#{dcontent},#{pid})
+		<selectKey keyProperty="no" resultType="java.lang.Integer"
+			order="AFTER">
+			select max(no) from detailboard where pid = #{pid }
+		</selectKey>
+	</insert>
+	
+	<insert id="detailBoardInsert"  parameterType="databean" >
+		insert into detailBoard(NO,GNO,DSEQ,DREF,DTODAY,DCOUNT,DUSER,DTITLE,DCONTENT,PID)  
+		values(<include refid="detailGetMax"/>,<include refid="detailGetMax"/>,0,0,sysdate,-1,#{duser},#{dtitle},#{dcontent},#{pid})
+		<selectKey keyProperty="no" resultType="java.lang.Integer"
+			order="AFTER">
+			select max(no) from detailboard where pid = #{pid }
+		</selectKey>
+	</insert>
+		
+		
+	<select id="getdeTailMaxNo" parameterType="databean" resultType="databean"> 
+		select * from detailboard where no=1 and pid=#{pid }
+	</select>	
+		
+	<delete id="detailBoardDelete" parameterType="databean">
+		delete from detailboard where no = #{no } and pid=#{pid }
+	</delete>
+		
+	<update id="detailBoardModifyUpdate" parameterType="databean">
+		update detailboard set dtitle = #{dtitle}, dcontent=#{dcontent} where no = #{no } and pid=#{pid}
+	</update>
+		
+		
+		
+	<insert id="detailWriteReply"  parameterType="databean" >
+		insert into detailBoard(NO,GNO,DSEQ,DREF,DTODAY,DCOUNT,DUSER,DTITLE,DCONTENT,PID)  
+		values(<include refid="detailGetMax"/>,#{gno },#{dseq},#{dref},sysdate,-1,#{duser},#{dtitle},#{dcontent},#{pid})
+		<selectKey keyProperty="no" resultType="java.lang.Integer"
+			order="AFTER">
+			select max(no) from detailboard where pid = #{pid }
+		</selectKey>
+	</insert>
+
+
+	<update id="detailBoardUpdateSeq" parameterType="databean">
+		update detailboard set dseq = dseq+1 where gno=#{gno } and dseq > #{dseq} and pid=#{pid}
+	</update>
+
+	<select id="getDetailInfo" resultType="databean" parameterType="databean">
+		select * from detailboard where pid = #{pid } and no=#{no }
+	</select>
+
+	<update id="detailAddCount" parameterType="databean">
+		update detailboard set dcount = dcount+1 where no = #{no } and pid=#{pid }
+	</update>
+
+	
+	
+	
+	<select id="getTotalCount" resultType="java.lang.Integer" parameterType="databean">
+		select count(*) from detailboard where pid = #{pid } 
+	</select>
+
+	<select id="detailBoardList" resultType="databean" parameterType="databean">
+		select * from (select rownum rnum, kk.* from ((select * from detailboard  order by gno desc, dseq)kk)) 
+		where pid = #{pid} and rnum >=#{dstart} and rnum <![CDATA[<=#{dend}]]> 
+	</select>
+	
+	
+	
+	<select id="addMilige" parameterType="databean">
+		update member set point = point + #{milige } where id = #{pid }
+	</select>
+
+	<select id="yeyakInput" parameterType="databean">
+		insert into
+		yeyak(YEYAKDAY,PID,USERID,ROOMNAME,MONEY,INWON,PENTIONNAME,BANK,CARD,ROOMINDEX)
+		values(#{yeyakDay },#{pid },#{yeyakid },#{yeyakroomname },#{yeyakMoney},
+		#{yeyakInwon },#{yeyakpentionName },#{bank },#{card },#{roomindex})
+	</select>
+	
+
+	
+	<select id="getYeyakRoomIndex" resultType="databean">
+		select * from yeyak where roomindex=1
+	</select>
+	
+	<select id="getYeyakMaxRoomIndex" resultType="java.lang.Integer">
+		select max(roomindex)+1 from yeyak
+	</select>
+
+	<select id="roomDetailPhoto" parameterType="databean"
+		resultType="databean">
+		select * from room where pid = #{pid } and roomindex = #{roomindex }
+	</select>
+
+	<select id="serchYeyakRoom" parameterType="databean" resultType="databean">
+		select * from yeyak where yeyakday = #{mybatiseDate} and pid=#{pid}
+		and roomname=#{roomname}
+	</select>
+
+	<select id="yeyakSerchSeven" parameterType="databean"
+		resultType="databean">
+		select * from yeyak where yeyakday = #{mybatiseDate} and pid=#{pid} and
+		roomname=#{roomname}
+	</select>
+
+	<select id="selectAllRoom" resultType="databean" parameterType="databean">
+		select * from room where pid = #{pid }
+	</select>
+
+	<select id="selectRoomOne" resultType="databean" parameterType="databean">
+		select * from room where pid=#{pid} and roomname=#{roomname}
+	</select>
+
+	<select id="getMainPhoto" resultType="databean" parameterType="databean">
+		select mainphoto, areaphoto from pention where pid = #{pid }
+	</select>
+
+	<select id="areaPentionDetail" parameterType="databean"
+		resultType="databean">
+		select * from pention where pid = #{pid }
+	</select>
+
+	<select id="myPageSub" resultType="databean" parameterType="databean">
+		select * from menu where menutype='mypage' and topkey = #{grade }
+	</select>
+
+	<select id="topMenu" resultType="databean" parameterType="databean">
+		select * from menu where menutype='top'
+	</select>
+
+	<select id="subMenu" resultType="databean" parameterType="databean">
+		select * from menu where topkey = #{menu}
+	</select>
+
+	<select id="areaMenu" resultType="databean" parameterType="databean">
+		select * from menu where menutype= #{serviceKey}
+	</select>
+
+	<select id="themaMenu" resultType="databean" parameterType="databean">
+		select * from menu where menutype= #{menu}
+	</select>
+
+	<select id="idChk" resultType="databean" parameterType="databean">
+		select * from member where id = #{id}
+	</select>
+
+	<select id="areaGetList" resultType="databean" parameterType="databean">
+		select * from pention where address1 like '%' ||
+		<include refid="getArea" />
+		|| '%' and pgrade<![CDATA[ < 3 ]]>
+	</select>
+
+	<select id="themaGetList" resultType="databean" parameterType="databean">
+		select * from pention where thema like '%' || #{themaSerchKey} || '%'
+		and address1 like '%' ||
+		<include refid="getThemaArea" />
+		|| '%'
+	</select>
+
+
+
+	<select id="newMemberInput" resultType="databean" parameterType="databean">
+		insert into member(id, password, name, email, tell, point, grade)
+		values(#{id},#{password},#{name},#{email},#{tell},0,3)
+	</select>
+
+	<select id="findId" resultType="databean" parameterType="databean">
+		select * from member where name = #{name } and email=#{email }
+	</select>
+
+	<select id="findPassword" resultType="databean" parameterType="databean">
+		select * from member where id = #{id } and email=#{email }
+	</select>
+
+
+
+
+
+	<!-- noticeboard////////////////////////////////////////////////////////////////////// -->
+
+
+	<select id="noticeCounting" resultType="java.lang.Integer"
+		parameterType="databean">
+		select count(*) from noticeboard where servicekey=#{noticekey}
+	</select>
+
+	<select id="notice" resultType="databean" parameterType="databean">
+       
+       <![CDATA[
+       select *from(select rownum rnum,kk. * from (select * from noticeboard where servicekey='noticeboard' order by gid desc ,seq)kk)
+         where rnum>=#{start} and rnum<=#{end}
+        ]]>
+	</select>
+
+	<select id="qna" resultType="databean" parameterType="databean">
+       <![CDATA[
+       select *from(select rownum rnum,kk. * from (select * from noticeboard where servicekey='qna' order by gid desc ,seq)kk)
+         where rnum>=#{start} and rnum<=#{end}
+        ]]>
+	</select>
+
+	<select id="detail" resultType="databean" parameterType="databean">
+		select * from NOTICEBOARD where IDS = #{ids} and SERVICEKEY=#{boardKey}
+	</select>
+
+	<update id="cntupdate" parameterType="databean">
+
+		update NOTICEBOARD set CNT = cnt+1 where IDS =#{ids} and
+		SERVICEKEY=#{boardKey}
+	</update>
+	
+	
+	 <select id="idsSuch" resultType="databean" parameterType="databean">
+		select * from noticeboard where ids=1 and servicekey=#{serviceKey}
+	</select> 
+	
+	
+	<insert id="insertOneOne" parameterType="databean">
+		insert into
+		NOTICEBOARD(ids,gid,seq,ref,reg_date,cnt,pname,title,content,SERVICEKEY,userid)
+		values(1,1,0,0,sysdate,-1,#{name},#{title},#{content},#{serviceKey},#{id})
+
+		<selectKey keyProperty="ids" resultType="java.lang.Integer"
+			order="AFTER">
+
+			select max(ids) from NOTICEBOARD where SERVICEKEY=#{serviceKey}
+		</selectKey>
+
+	</insert>
+	
+	
+	<insert id="insertOne" parameterType="databean">
+		insert into
+		NOTICEBOARD(ids,gid,seq,ref,reg_date,cnt,pname,title,content,SERVICEKEY,userid)
+		values(
+		<include refid="selectMax" />
+		,
+		<include refid="selectMax" />
+		,0,0,sysdate,-1,#{name},#{title},#{content},#{serviceKey},#{id})
+
+
+		<selectKey keyProperty="ids" resultType="java.lang.Integer"
+			order="AFTER"><!--위에꺼 실행하고 나서 실행시켜라 빈에다 넣어 -->
+
+			select max(ids) from NOTICEBOARD where SERVICEKEY=#{serviceKey}
+		</selectKey>
+
+	</insert>
+	<update id="reply" parameterType="databean">
+      <![CDATA[
+      update noticeboard set seq = seq+1 where servicekey=#{serviceKey} and gid=#{gid} and seq >#{seq} 
+         ]]>
+	</update>
+
+	<insert id="replycom" parameterType="databean">
+		insert into
+		NOTICEBOARD(ids,gid,seq,ref,reg_date,cnt,pname,title,content,SERVICEKEY,userid)
+		values(
+		<include refid="selectMax" />
+		,#{gid},#{seq}+1,#{ref}+1,sysdate,-1,#{name},#{title},#{content},#{serviceKey},#{id})
+
+		<selectKey keyProperty="ids" resultType="java.lang.Integer"
+			order="AFTER">
+			select max(ids) from NOTICEBOARD where SERVICEKEY=#{serviceKey}
+		</selectKey>
+
+	</insert>
+
+	<update id="updateWrite" parameterType="databean">
+		update noticeboard set title = #{title}, content = #{content} where ids =
+		#{ids} and servicekey=#{serviceKey}
+
+	</update>
+
+	<select id="deleteselect" parameterType="databean" resultType="java.lang.Integer">
+		select count(seq) from noticeboard where gid=#{gid} and
+		serviceKey=#{serviceKey}
+	</select>
+	<update id="noticedeleteUp">
+		update noticeboard set title =#{title} ,content=#{content} where
+		serviceKey=#{serviceKey} and ids=#{ids}
+	</update>
+	<delete id="noticedelete" parameterType="databean">
+		delete from noticeboard where ids=#{ids} and serviceKey=#{serviceKey}
+	</delete>
+	<select id="check" parameterType="databean" resultType="databean">
+		select title,seq,ids from noticeboard where serviceKey='qna' and title=#{titles} and gid=#{gid}
+	</select>
+
+	<!--noticeboard/////////////////////////////////////////////////////////////////////// -->
+
+
+<!-- Member~~~~~~~~~~~~~~~~~~~~~~~~~~~~////////////////////////////////////////////////////////////////-->
+	<update id="memberModify" parameterType="databean">
+			update member set password =#{password} , tell=#{tell} where id=#{id}
+	</update>
+	<!--회원 탈퇴 -->
+	<update id="memberExit" parameterType="databean">
+		update member set grade=4 where id=#{id}
+	</update>
+	<select id="getmile" parameterType="databean" resultType="java.lang.Integer">
+		select point from member where id=#{id}
+	</select>
+	
+	<select id="memberList" resultType="databean" parameterType="databean">
+			select * from member where id like '%' || #{suchId} || '%' and grade >1
+	</select> 
+	
+	<update id="upgladeAndsaup" parameterType="databean">
+		update member set grade=#{chgrade} ,SAUPJAINDEX=1  where id=#{upId}
+	</update>
+	
+	<update id="upglade" parameterType="databean">
+		update member set grade=#{chgrade},SAUPJAINDEX=1 where id=#{upId}
+	</update>
+	<!--해당아이디에 해당하는 놈의 그래이드를 가져와  -->
+	<select id="mems" parameterType="databean" resultType="java.lang.Integer">
+		select grade from member where id=#{upId}
+	</select>
+	<!--아이디로 팬션테이블에가서 pgrade를 바꿔준다  -->
+	<update id="upPgrade" parameterType="databean">
+		update pention set pgrade=#{chgrade} where pid=#{upId}
+	</update>
+	<update id="upPgraded" parameterType="databean">
+		update pention set pgrade=2 where pid=#{idup}
+	</update>
+	<!--grade가 1보다크고 아이디에 {k}가들어가는 놈들 을 다가져와  -->
+	<select id="upid" parameterType="databean" resultType="databean">
+		select * from member where id like '%' || #{k} || '%' and grade >1
+	</select>
+		
+	<select id="selectsaupjaindex" parameterType="databean" resultType="databean">
+		select * from member where grade=3 and saupjaindex=2
+	</select>
+	<select id="selecpgraded" parameterType="databean" resultType="databean">
+		select pgrade from pention where pid=#{idup}
+	</select>
+	<!-- 등업신청받은놈 변경하기 그래이드를 사업자로 사업자인덱스를 3으로  -->
+	<update id="idUpgrade" parameterType="databean">
+		update member set grade=2 ,saupjaindex=3 where id=#{idup}
+	
+	</update>
+	<!--===========================================================  -->
+	<select id="selecpgrade" parameterType="databean" resultType="databean">
+		select pgrade from pention where pid=#{upId}
+	</select>
+	<!--===========================================================  -->
+	<!--정산하는 놈의 정보를 받아오자  -->
+	<select id="milemember" resultType="databean" parameterType="databean">
+		select *from member where id=#{upId}
+		
+	
+	</select>
+	<!-- 등급이 2인놈들의 모든정보를 긁어오자 -->
+	<select id="dunhill" parameterType="databean" resultType="databean">
+		select *from member where grade=2 and point!=0
+	</select>
+	 <!-- 해당아이디의 놈의 마일리지를 0원으로 만든다 -->
+	<update id="resetmile" parameterType="databean">
+		update member set point=0 where id=#{upId}
+	</update>
+	<!--매출테이블에 정산한 내용을 인서트 시키자  -->
+	<insert id="insertmoney" parameterType="databean">
+		insert into pay (payday,saupid,mymoney,ibgmmoney)values (sysdate,#{saupid},#{mymoney},#{ibgmMoney})
+	</insert>
+	<!--매출테이블을 긁어오자  -->					
+	<select id="getpaytable" parameterType="databean" resultType="databean">
+		select * from pay where payday like '%' || #{monthplYear} || '%'
+	</select>
+	 <select id="summoney" parameterType="databean" resultType="java.lang.Integer">
+		select sum(mymoney) as sumsal from pay where payday like '%' || #{monthplYear} || '%'
+	</select> 
+	 
+	
+	<!--/.///////////////////////////////////////////////////////////////////////  -->
+
+
+	<!-- ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ커뮤니티ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ -->
+	
+	<select id="freecount" resultType="java.lang.Integer"
+		parameterType="databean">
+		select count(*) from freeboard
+	</select>
+	
+	<select id="fboard" parameterType="databean" resultType="databean">
+		select * from (select rownum rnum, kk.* from ((select * from freeboard  order by fgid desc, fseq)kk)) 
+		where rnum >=#{fstart} and rnum <![CDATA[<=]]>#{fend} 
+	</select>
+	
+	<select id="fdetail" parameterType="databean" resultType="databean">
+		select * from freeboard where FIDS = #{fids}
+	</select>		
+	
+	<update id="freereply" parameterType="databean">
+      update freeboard set fseq = fseq+1 where fids=#{fids} and fgid=#{fgid} and fseq >#{fseq}   
+	</update>
+	
+
+	<insert id="freereplycom" parameterType="databean">
+		insert into
+		freeboard(fids,fgid,fseq,fref,freg_date,fcnt,ftitle,fcontent,fuserid,fupfile)
+		values(
+		<include refid="freeselectMax" />
+		,#{fgid},#{fseq},#{fref},sysdate,-1,#{ftitle},#{fcontent},#{fuserid},'0,')
+
+		<selectKey keyProperty="fids" resultType="java.lang.Integer"
+			order="AFTER">
+			select max(fids) from freeboard
+		</selectKey>
+
+	</insert>
+	
+	<update id="freecnt" parameterType="databean">
+		update freeboard set fcnt = fcnt+1 where fids = #{fids }
+	</update>
+	
+	 <update id="freemodifyupdate" parameterType="databean">
+		update freeboard set ftitle = #{ftitle}, fcontent = #{fcontent},fhead=#{fhead}, fupfile = #{fupfile} where fids =#{fids}
+	</update> 
+	
+	<insert id="freenull"  parameterType="databean" >
+		insert into freeboard(fids,fgid,fseq,fref,freg_date,fcnt,fuserid,ftitle,fcontent,fupfile)  
+		values(1,1,0,0,sysdate,-1,#{fuserid},#{ftitle},#{fcontent},#{fupfile})
+		<selectKey keyProperty="fids" resultType="java.lang.Integer"
+			order="AFTER">
+			select max(fids) from freeboard
+		</selectKey>
+	</insert>
+	
+	<insert id="freeboardinsert"  parameterType="databean" >
+		insert into freeboard(fids,fgid,fseq,fref,freg_date,fcnt,fuserid,ftitle,fcontent,fhead,fupfile)  
+		values(<include refid="freeselectMax"/>,<include refid="freeselectMax"/>,0,0,sysdate,-1,#{fuserid},#{ftitle},#{fcontent},#{fhead},#{fupfile})
+		<selectKey keyProperty="fids" resultType="java.lang.Integer"
+			order="AFTER">
+			select max(fids) from freeboard
+		</selectKey>
+	</insert>
+		
+		
+	<select id="freemaxids" parameterType="databean" resultType="databean"> 
+		select * from freeboard where fids=1
+	</select>
+	<!--해당하는 글번호에 해당하는 모든 놈을 긁어온다  -->
+	<select id="Oneman" parameterType="databean" resultType="databean">
+		select *from freeboard where fids=#{fids}
+	</select>
+	
+	<select id="freedeleteselect" parameterType="databean" resultType="java.lang.Integer">
+		select count(fseq) from freeboard where fgid=#{fgid}
+	</select>
+	
+	<update id="freedeleteUp">
+		update freeboard set ftitle =#{ftitle} ,fcontent=#{fcontent} where fids=#{fids}
+	</update>
+	
+	<delete id="freedelete" parameterType="databean">
+		delete from freeboard where fids=#{fids}
+	</delete>
+	<select id="fcheck" parameterType="databean" resultType="databean">
+		select ftitle,fseq,fids from freeboard where  ftitle=#{titles} and fgid=#{fgid}
+	</select>
+	
+	
+	<!-- ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ커뮤니티ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ -->
+
+
+	<!-- ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡtopsearchboard STARTㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ -->
+	
+	<select id="afterlist" resultType="databean" parameterType="databean" >
+		
+		select * from (select rownum rnum,kk.* from ((select * from freeboard where fhead=2 and fref=0 and fseq=0 order by fids desc)kk)) 
+		where rnum >=${a_start} and rnum <![CDATA[<=]]>${a_end}
+	</select>
+	
+
+
+   
+	<select id="aftercount" resultType="java.lang.Integer">
+		select count(*) from freeboard where fhead=2
+	</select>
+	
+	<!-- ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡtopsearchboard ENDㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ -->
+
+	
+</mapper>

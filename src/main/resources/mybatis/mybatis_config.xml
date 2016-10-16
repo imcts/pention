@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+ PUBLIC "//mybatis.org/DTD Config 3.0//EN" 
+ "http://mybatis.org/dtd/mybatis-3-config.dtd">
+ 
+ <configuration>
+ 	<settings>
+ 		<setting name="cacheEnabled" value="false"/><!--전역에서 쓸것이냐 말 것이냐  -->
+ 		<setting name="useGeneratedKeys" value="false"/><!--jdbc드라이버를 없으면 내가 만들겠다.  나 안만들고 설정한 값으로 갈것이다.-->
+ 	</settings>
+ </configuration>
