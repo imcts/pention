@@ -1,1 +1,1 @@
-# 2014년 프로그램을 처음 시작했을때 만들었던 펜션 예약 사이트
+# I made this program when i began web programing on 2014.
